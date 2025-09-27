@@ -1,1 +1,0 @@
-# ShellHacks-2025
