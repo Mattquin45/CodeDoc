@@ -1,0 +1,117 @@
+public class ArrayList <AnyType>{
+    public final static int CAPACITY = 10;
+    private int size;
+    private AnyType[] items;
+
+    public ArrayList(){
+       clear();
+    }
+    public ArrayList(int capacity){
+        size = 0;
+        items = (AnyType[]) new Object[capacity];
+
+    }
+
+    public void clear(){
+        size = 0;
+        items = (AnyType[]) new Object[CAPACITY];
+    }
+
+    public int size(){
+        return size;
+    }
+
+    public boolean isEmpty(){
+        return size() == 0;
+    }
+
+    private void ensureCapacity(int capacity){
+        if(capacity < size){
+            return;
+        }
+        AnyType[] temp = (AnyType[]) new Object[size() * 2];
+        for(int i = 0; i < size();i++){
+            temp[i] = items[i];
+        }
+        items = temp;
+    }
+
+
+    public void add(AnyType data){
+       add(size() , data);
+    }
+
+    public void add(int index , AnyType data){
+        if(index < 0 || index > size()){ //make sure index is valid
+            throw new IndexOutOfBoundsException("Invalid index.");
+        }
+        if(items.length == size()){ // to make sure there is space to add element
+            ensureCapacity(size() * 2);
+        }
+        for(int i = size(); i > index;i--){ //move the data upwards to empty the desired index
+            items[i] = items[i-1];
+        }
+        items[index] = data;
+        size++;
+    }
+
+    public void remove(int index){
+        if(index < 0 || index > size() -1 ){ //make sure index is valid
+            throw new IndexOutOfBoundsException("Invalid index.");
+        }
+        for(int i = index; i <size();i++){
+            items[i] = items[i+1];
+        }
+        size--;
+    }
+
+    public void remove(){
+        remove(size() -1 );
+    }
+
+    public void removeAll(){
+        clear();
+    }
+
+    public AnyType get(int index){
+        if(index < 0 || index > size() -1 ){ //make sure index is valid
+            throw new IndexOutOfBoundsException("Invalid index.");
+        }
+        return items[index];
+    }
+
+    public void set(int index , AnyType data){
+        if(index < 0 || index > size() -1 ){ //make sure index is valid
+            throw new IndexOutOfBoundsException("Invalid index.");
+        }
+        items[index] = data;
+    }
+
+    public int count(){
+        return size();
+    }
+
+    public boolean contains(AnyType data){
+        for(int i = 0; i < size();i++){
+            if(items[i].equals(data)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public String toString(){
+        if(isEmpty()){
+            return "[]";
+        }
+        String str = "[";
+        for(int i = 0; i < size()-1;i++){
+            str = str + items[i] + ", ";
+        }
+        return str = str + items[size-1] + "]";
+    }
+
+
+
+}

@@ -1,0 +1,185 @@
+import java.io.Console;
+import java.util.NoSuchElementException;
+import java.util.logging.Logger;
+
+public class LinkedList  <T> {
+
+    private class Node<T>{
+        private T data;
+        Node<T> next;
+        private Node(){
+            data = null;
+            next = null;
+        }
+    }
+    private int size;
+    private Node<T> head;
+
+    public LinkedList(){
+        size = 0;
+        head = null;
+    }
+
+    public void AddFirst(T data){
+        Node<T> newNode = new Node<T>();
+        newNode.data = data;
+        newNode.next = head;
+        head = newNode;
+        size++;
+    }
+
+    public void AddLast(T data){
+        Node<T> newNode = new Node<T>();
+        newNode.data = data;
+        Node<T> temp = head;
+        for(int i = 0;i < size - 1;i++){
+            temp = temp.next;
+        }
+        newNode.next = temp.next;
+        temp.next = newNode;
+        size++;
+    }
+
+    public void add(T data){
+        AddLast(data);
+    }
+
+    public void add(int index, T data){
+        if(index < 0 || index > size){
+            throw new IndexOutOfBoundsException();
+        }
+        Node<T> newNode = new Node<T>();
+        newNode.data = data;
+        if(index == 0){
+            newNode.next = head;
+            head = newNode;
+            size++;
+        }
+        Node<T> temp = head;
+        for(int i = 0;i < index - 1;i++){
+            temp = temp.next;
+        }
+        newNode.next = temp.next;
+        temp.next = newNode;
+        size++;
+    }
+
+    public int size(){
+        return size;
+    }
+
+    public T get(int index){
+        if(index < 0 || index >= size){
+            throw new NoSuchElementException();
+        }
+        if(index == 0){
+            return head.data;
+        }
+        Node<T> temp = head;
+        for(int i = 0; i < index;i++){
+            temp = temp.next;
+        }
+        return temp.data;
+    }
+
+    public T getFirst(){
+        return get(0);
+    }
+
+    public T getLast(){
+        return get(size - 1);
+    }
+
+    public void set(int index , T data){
+        if( index < 0 || index >= size){
+            throw new NoSuchElementException();
+        }
+        Node<T> temp = new Node<>();
+        for(int i = 0; i < index; i++){
+            temp = temp.next;
+        }
+        temp.data = data;
+    }
+
+    public void clear(){
+        head = null;
+        size = 0;
+    }
+
+    public void removeFirst(){
+        remove(0);
+    }
+
+    public void removeLast(){
+        remove(size-1);
+    }
+
+    public void remove(){
+        removeLast();
+    }
+
+    public void remove(int index){
+        if(index < 0 || index > size -1){
+            throw new IndexOutOfBoundsException();
+        }
+        if(index == 0){
+            head = head.next;
+            size--;
+            return;
+        }
+        Node<T> temp = head;
+        for(int i = 0; i < index;i++){
+            temp = temp.next;
+        }
+        Node<T> temp2 = temp.next;
+        temp.next = temp2.next;
+        size--;
+    }
+
+    public boolean contains(T data){
+        Node<T> temp = head;
+        for(int i = 0; i < size;i++){
+            if(temp.data.equals(data)){
+                return true;
+            }
+            temp = temp.next;
+        }
+        return false;
+    }
+
+    public void reverse(){
+        Node<T> temp1 = null;
+        Node<T> temp2 = head;
+        Node<T> temp3 = temp2.next;
+        int counter = 0;
+        if(size < 3){
+            throw new NoSuchElementException("List must contain at least two elements to reverse");
+        }
+        for(int i = 0; i < size-1;i++){
+            if(temp3 != null){
+                    temp3 = temp2.next;
+                    temp2.next = temp1;
+                    temp1 = temp2;
+                    temp2 = temp3;
+            }else{
+                break;
+            }
+        }
+        temp2.next = temp1;
+        head = temp2;
+    }
+
+
+    public String toString(){
+        Node<T> temp = head;
+        if(size == 0){
+            return "[]";
+        }
+        String str = "[";
+        while(temp.next != null){
+            str = str + temp.data + ", ";
+            temp = temp.next;
+        }
+        return str + temp.data + "]";
+    }
+}
