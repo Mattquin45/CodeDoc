@@ -57,6 +57,8 @@ Start the Streamlit UI
 Open your browser at 👉 http://localhost:8501
 or click on the link thats produced on the streamlit terminal
 
+- Please always make sure that both the API server is running at the same time as streamlit
+
 # 💡 Usage
 
 - Enter a directory path or upload files directly in the Streamlit UI.
