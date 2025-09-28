@@ -22,7 +22,7 @@ CodeDoc is a ShellHacks 2025 project that implemented the use of Google's ADK to
 - source venv/bin/activate   # Mac/Linux
 - venv\Scripts\activate      # Windows
 
-# 📦 Requirements
+# 📦 Requirements(in VE)
 
 - Python 3.9+
 - ADK
