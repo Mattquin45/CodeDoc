@@ -1,36 +1,29 @@
-📄 Documentation Generator
+# 📄 Documentation Generator
 
-A web-based documentation generator powered by ADK, an ADK API server, and a Streamlit interface.
-Upload your source files (.java, .py, .txt, etc.), and the system will analyze the code and generate structured documentation automatically.
+This specific Hackathon project made by a team of 4, implemented the use of Google's ADK to create easier use of coding documentation. This specifically focuses on the aspect of explaining code that is either uploaded or shown in your laptop/computer directory. This allows companies and teams lessen the stress of trying to understand different coding syntax and focus on their project milestones. 
 
-🚀 Features
+# 🚀 Features
 
-Upload one or more source files.
+-Upload one or more source files.
+-Automatically generate documentation (classes, methods, variables, descriptions).
+-Streamlit UI for easy interaction and being able to record past documentation requests.
+-Backend powered by ADK + API server.
 
-Automatically generate documentation (classes, methods, variables, descriptions).
+# 📦 Requirements
 
-Streamlit UI for easy interaction.
-
-Backend powered by ADK + API server.
-
-📦 Requirements
-
-Python 3.9+
-
-ADK
- installed
-
-Streamlit (pip install streamlit)
-
-Other dependencies in requirements.txt
+-Python 3.9+
+-ADK
+-Streamlit (pip install streamlit)
+-Other dependencies in requirements.txt
 
 ⚙️ Installation
 # Clone this repository
-git clone https://github.com/yourusername/yourrepo.git
-cd yourrepo
+git clone https://github.com/Mattquin45/CodeDoc.git
+cd CodeDoc.git
 
 # Create a virtual environment
-python -m venv venv
+python -m venv venv        # Windows
+python3 -m venv venv       #Mac
 source venv/bin/activate   # Mac/Linux
 venv\Scripts\activate      # Windows
 
@@ -46,51 +39,47 @@ API_SERVER_PORT=8000
 STREAMLIT_PORT=8501
 GOOGLE_API_KEY=your_api_key_here
 
-▶️ Running the Project
+ # ▶️ Running the Project
 1. Start the ADK API Server
 python -m adk.api_server --port 8000
 
 2. Start the Streamlit UI
-streamlit run app.py --server.port 8501
-
+streamlit run apps.ui.py --server.port 8501
 
 Open your browser at 👉 http://localhost:8501
+or click on the link thats produced on the streamlit terminal
 
-💡 Usage
+# 💡 Usage
 
-Enter a directory path or upload files directly in the Streamlit UI.
-
-Choose a file extension (e.g., .py, .java).
-
-Click Generate Documentation.
-
-Documentation will be displayed in the app (and optionally saved to .txt).
+-Enter a directory path or upload files directly in the Streamlit UI.
+-Choose a file extension (e.g., .py, .java).
+-Click Generate Documentation.
+-Documentation will be displayed in the app (and optionally saved to .txt) and also downloaded on your system
 
 Example input:
 
 Directory: /Users/Student/Documents/MyProject
 Extension: .java
 
-🛠️ Development Notes
+# 🛠️ Development Notes
 
-The main ADK agent is defined in root_agent.yaml.
+The main ADK agent is defined in root_agent.py.
 
-Streamlit UI logic is in app.py.
+Streamlit UI logic is in ui.py.
 
-Documentation output is handled in /output by default.
+Documentation output is handled in the agent.py by default.
 
-❗ Troubleshooting
+# ❗ Troubleshooting
 
-ValueError: No root_agent found… → Ensure root_agent.yaml exists in your ADK directory.
+-In your ui.py file make sure that your APP-NAME is the name of your project file. 
+-Make sure that adk api_server is being run on your folder. I recomend running adk api_server . on the directory that 
+ the project is contained in.
+-Make sure your api keys are correct and consistent because that can affect the performance of the FrontEnd
+-Files not showing in Streamlit → Ensure you are uploading supported file types (.py, .java, .txt).
 
-PermissionError: [Errno 13] Permission denied → Check folder permissions.
+# Hi My name is Matthew!
+- My part in this specific shellhacks project was putting my part in both the ADK development and fully implemeting a UI in streamlit by connecting it to the backend ADK API. I helped in cooperating in any part anybdoy needed help and mainly focused on making the FrontEnd and API backend. In ADK development, I help create our project idea and helped in checking if frontend and the ADK agents were compatible.
 
-Files not showing in Streamlit → Ensure you are uploading supported file types (.py, .java, .txt).
-
-🤝 Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss your ideas.
-
-📜 License
+# 📜 License
 
 MIT License — free to use and modify.
