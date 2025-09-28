@@ -16,6 +16,12 @@ CodeDoc is a ShellHacks 2025 project that implemented the use of Google's ADK to
 - Streamlit UI for easy interaction and being able to record past documentation requests.
 - Backend powered by ADK + API server.
 
+# Create a virtual environment
+- python -m venv venv        # Windows
+- python3 -m venv venv       #Mac
+- source venv/bin/activate   # Mac/Linux
+- venv\Scripts\activate      # Windows
+
 # 📦 Requirements
 
 - Python 3.9+
@@ -28,11 +34,6 @@ CodeDoc is a ShellHacks 2025 project that implemented the use of Google's ADK to
 - git clone https://github.com/Mattquin45/CodeDoc.git
 - cd CodeDoc.git
 
-# Create a virtual environment
-- python -m venv venv        # Windows
-- python3 -m venv venv       #Mac
-- source venv/bin/activate   # Mac/Linux
-- venv\Scripts\activate      # Windows
 
 # Install dependencies
 - pip install -r requirements.txt
