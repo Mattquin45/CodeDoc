@@ -59,6 +59,40 @@ def text_translation(files: List[str], extension: str):
     return text_files
 
 
+def pattern_matching_java(file):
+    access = {"public", "private", "protected"}
+    parameters = {"(", ")", "}", "{", "throws"}
+    try:
+        with open(file, "r") as file:
+            for line in file:
+                count = 0
+                for str in access:
+                    if str in line.strip():
+                        count += 1
+                for str in parameters:
+                    if str in line.strip():
+                        count += 1
+                if count >= 4:
+                    return line.strip()
+    except FileNotFoundError:
+        print("Error: The file 'my_file.txt' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def pattern_matching_python(file):
+    keyword = "def"
+    try:
+        with open(file, "r") as file:
+            for line in file:
+                if keyword in line.strip():
+                    return line.strip()
+    except FileNotFoundError:
+        print("Error: The file 'my_file.txt' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
 # --- Agent Definitions ---
 
 # STEP 1: Initial Reading Agent (Runs ONCE at the beginning)
@@ -85,8 +119,10 @@ interpreter_agent_in_loop = LlmAgent(
     name="WritingAgent",
     model=GEMINI_MODEL,
     include_contents='none',
+    output_key=STATE_CRITICISM,
     # MODIFIED Instruction: More nuanced completion criteria, look for clear improvement paths.
-    instruction=f"""You are a documentation AI who's job is to analyze code and be able to provide documentation on what it can accomplish
+    instruction=f"""You are a documentation AI who's job is to analyze code and be able to provide documentation on 
+    what it can accomplish
 
     **Documents to Review:**
     ```
@@ -101,7 +137,15 @@ interpreter_agent_in_loop = LlmAgent(
     5. Methods that it declares and its parameters 
     6. Constructors
     7. Class variables 
-    After finding these components you must provide a description of it that is concise and to the point 
+    
+    if its in java: use the pattern_matching_java method with parameter of 
+    the current text file to check the entire script for methods:
+        If it returns a line then that is the start of a method, analyse it and add it to documentation
+    if its in python: use the pattern_matching_python method with parameter of 
+    the current text file to check the entire script for methods:
+        If it returns a line then that is the start of a method, analyse it and add it to documentation
+        
+    After finding all components you must provide a description of it that is concise and to the point 
     Example:
     USES: java.util.scanner, java.io.file , 
     CLASS NAME : Math()
@@ -114,11 +158,12 @@ interpreter_agent_in_loop = LlmAgent(
     CONSTRUCTORS: Math(), Math(int x , int y) ...
     CLASS_VARIABLES: int pi = 3.14, int e = 2.17
     
-    After doing this respond with {COMPLETION_PHRASE}
+    Returns {COMPLETION_PHRASE} only after a minimum of two itterations have passed and all elements of the 
+    notepad have been interpreted
     
 """,
+    tools=[pattern_matching_java, pattern_matching_python],
     description="Analyses the file to create proper documentation for the code given",
-    output_key=STATE_CRITICISM
 )
 
 # STEP 2b: Refiner/Exiter Agent (Inside the Refinement Loop)
@@ -188,9 +233,8 @@ documentation_agent_in_loop = LlmAgent(
     description="Refines the document based on writing_agent parameters, or calls exit_loop if document indicates "
                 "completion.",
     tools=[exit_loop],  # Provide the exit_loop tool
-    output_key=STATE_CURRENT_DOC  # Overwrites state['current_document'] with the refined version
+    output_key=STATE_CURRENT_DOC
 )
-
 
 # STEP 2: Refinement Loop Agent
 refinement_loop = LoopAgent(
@@ -214,4 +258,3 @@ root_agent = SequentialAgent(
     description="Writes an initial document and then iteratively refines it with critique using an exit tool."
 
 )
-
