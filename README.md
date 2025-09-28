@@ -8,8 +8,6 @@ CodeDoc is a ShellHacks 2025 project that implemented the use of Google's ADK to
 - Google ADK (AI agents)
 - Streamlit (FrontEnd UI)
 - ADK API server ( API )
-- Backend powered by ADK + API server.
-
 
 # 🚀 Features
 
