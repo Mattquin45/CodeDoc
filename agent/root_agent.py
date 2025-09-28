@@ -98,5 +98,3 @@ root_agent = SequentialAgent(
     description="Reads code files and iteratively generates/refines documentation."
 )
 
-# --- Expose root_agent ---
-# ADK looks for a variable named 'root_agent' in this file

@@ -2,18 +2,22 @@ import streamlit as st
 import requests
 import json
 import os
+import sys
 import uuid
 import time
+import tempfile
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from agent.agent import process_uploaded_file, root_agent
 
 # --- Config ---
 st.set_page_config(
-    page_title="Documentation Generator",
-    page_icon="📄",
+    page_title="CodeDoc",
+    page_icon="/Users/Student/Documents/club.png",
     layout="centered"
 )
 
-API_BASE_URL = "http://localhost:8000"   # ADK server
-APP_NAME = "shellhack_current"    # Matches your root_agent app_name
+API_BASE_URL = "http://localhost:8000"   
+APP_NAME = "CodeDoc"    
 
 # --- Session State ---
 if "user_id" not in st.session_state:
@@ -71,11 +75,10 @@ def run_documentation(directory, extension):
         st.error(f"Error: {response.text}")
         return False
 
-    # ADK returns a list of events
     events = response.json()
     doc_text = None
 
-    doc_text = ""  # start with empty string
+    doc_text = ""  
 
     for event in events:
         if "content" in event and "parts" in event["content"]:
@@ -89,11 +92,25 @@ def run_documentation(directory, extension):
         return True
 
 
-def run_uploaded_file(filename, code):
-    """Send uploaded file contents to ADK."""
-    if not st.session_state.session_id:
-        st.error("No active session. Please create one first.")
-        return False
+def run_uploaded_file(file):
+    """
+    Process a single uploaded file, run it through the ADK agent, and store the generated documentation.
+    """
+    # --- Save file to temp ---
+    temp_dir = tempfile.gettempdir()
+    txt_file_path = os.path.join(temp_dir, file.name)
+    code = file.read().decode("utf-8")
+    with open(txt_file_path, "w") as f:
+        f.write(code)
+
+    # --- Add file to agent state so pattern_matching can see it ---
+    process_uploaded_file(file.name, code)
+
+    # --- Build the message for ADK ---
+    message_text = (
+        f"Generate documentation for the uploaded file: {txt_file_path}\n\n"
+        "Please process it and return human-readable documentation."
+    )
 
     response = requests.post(
         f"{API_BASE_URL}/run",
@@ -104,40 +121,39 @@ def run_uploaded_file(filename, code):
             "session_id": st.session_state.session_id,
             "new_message": {
                 "role": "user",
-                "parts": [
-                    {"text": f"Generate documentation for file: {filename}\n\n{code}"}
-                ]
+                "parts": [{"text": message_text}]
             }
         })
     )
 
     if response.status_code != 200:
-        st.error(f"Error: {response.text}")
-        return False
-
+        st.error(f"Error processing file {file.name}: {response.text}")
+        return None
+    
+    # --- Collect documentation output ---
     events = response.json()
-    doc_text = ""  # start with empty string
-
+    doc_text = ""
     for event in events:
         if "content" in event and "parts" in event["content"]:
             for part in event["content"]["parts"]:
                 if "text" in part:
                     doc_text += part["text"] + "\n"
 
+    # --- Store in session state ---
     if doc_text:
-        st.session_state.docs.append((filename, doc_text))
-        return True
-    return False
+        st.session_state.docs.append((file.name, doc_text))
+        return doc_text
+    return None
 
 
 # --- UI ---
 col1, col2, col3 = st.columns([2, 2, 1]) 
 with col2:
     st.image("/Users/Student/Documents/club.png", width=100)
-col1, col2, col3 = st.columns([1, 5, 1])  # widen the middle column
+col1, col2, col3 = st.columns([1, 5, 1])  
 with col2:
     st.markdown(
-        "<h1 style='margin: 0; text-align: center;'>Documentation Generator</h1>",
+        "<h1 style='margin: 0; text-align: center;'>CodeDoc</h1>",
         unsafe_allow_html=True
     )
 
@@ -165,54 +181,6 @@ with col1:
 with col2:
     extension = st.text_input("File extension", ".py")
 
-# --- File upload option ---
-uploaded_files = st.file_uploader(
-    "Upload your source files",
-    type=["java", "py", "txt"],
-    accept_multiple_files=True
-)
-
-# --- Merge options ---
-st.subheader("Or upload two documents to make sure no merge error's occur")
-col1, col2 = st.columns(2)  
-with col1:
-    directory1 = st.text_input("Directory 1", "./")
-with col2:
-    directory2 = st.text_input("Directory 2", "./")
-col1, col2 = st.columns(2)
-col1, col2 = st.columns(2)
-with col1:
-    extension1 = st.text_input("File extension 1", ".py")
-with col2:
-    extension2 = st.text_input("File extension 2", ".py")
-
-with col1:
-    uploaded_files1 = st.file_uploader(
-        "Upload files for Directory 1",
-        type=["java", "py", "txt"],
-        accept_multiple_files=True,
-        key="uploader1"
-    )
-
-with col2:
-    uploaded_files2 = st.file_uploader(
-        "Upload files for Directory 2",
-        type=["java", "py", "txt"],
-        accept_multiple_files=True,
-        key="uploader2"
-    )
-
-
-# --- Buttons ---
-if st.button("Generate Documentation"):
-    if uploaded_files:
-        for file in uploaded_files:
-            code = file.read().decode("utf-8")
-            run_uploaded_file(file.name, code)
-    elif directory and extension:
-        run_documentation(directory, extension)
-    else:
-        st.warning("Please provide either a directory/extension or upload files.")
 
 # Display results
 st.subheader("📑 Documentation Output")

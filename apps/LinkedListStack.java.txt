@@ -1,0 +1,93 @@
+public class LinkedListStack <T>{
+    //canon stack implementation
+    private class Node<T>{
+        private T data;
+        private Node<T> next;
+    }
+
+    private int size;
+    private Node<T> top;  //acts as head
+
+    public LinkedListStack(){
+        size = 0;
+        top = null;
+    }
+
+    public boolean isEmpty(){
+        return top == null;
+    }
+
+    public void push(T data){
+        Node<T> node = new Node<>();
+        node.data = data;
+        node.next = top;
+        top = node;
+        size++;
+    }
+
+    public T pop(){
+        if(isEmpty()){
+            throw new StackOverflowError();
+        }
+        T data = top.data;
+        top = top.next;
+        size--;
+        return data;
+    }
+
+    public T peek(){
+        if(isEmpty()){
+            throw new StackOverflowError();
+        }
+        return top.data;
+    }
+
+    public int size(){
+        return size;
+    }
+
+    public boolean contains(T data){
+        Node<T> temp = top;
+        while(temp != null){
+            if(temp.data.equals(data)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void reverse(){
+        if(isEmpty()){
+            throw new StackOverflowError();
+        }
+        Node<T> temp = null;
+        Node<T> temp2 = top;
+        Node<T> temp3 = top.next;
+        for(int i = 0; i < size -1;i++){
+            temp3 = temp2;
+            temp2 = temp;
+            temp = temp.next;
+            temp2 = temp2.next;
+            temp3 = temp3.next;
+        }
+    }
+
+    public String toString(){
+        if(isEmpty()){
+            return "[]";
+        }
+        Node<T> temp = top;
+        String str = "[";
+        while(temp.next != null){
+            str = str + temp.data + ", ";
+            temp = temp.next;
+        }
+        str += temp.data + "]";
+        return str;
+    }
+
+
+
+
+
+}

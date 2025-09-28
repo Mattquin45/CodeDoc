@@ -12,9 +12,9 @@ from typing import List
 
 
 # --- Constants ---
-APP_NAME = "shellhack_current"  # change this name every time if your file name is different for it to work.
+APP_NAME = "CodeDoc"  # change this name every time if your file name is different for it to work.
 USER_ID = "dev_user_01"
-SESSION_ID_BASE = "loop_exit_tool_session"  # New Base Session ID
+SESSION_ID_BASE = "loop_exit_tool_session" 
 GEMINI_MODEL = "gemini-2.0-flash"
 BOLD = '\033[1m'
 RESET = '\033[0m'
@@ -24,16 +24,30 @@ RESET2 = "\x1B[0m"
 # --- State Keys ---
 STATE_CURRENT_DOC = "current_array"
 STATE_CRITICISM = "criticism"
-# Define the exact phrase the Critic should use to signal completion
 COMPLETION_PHRASE = "Documentation complete"
 
 
 # --- Tool Definition ---
+def process_uploaded_file(filename: str, code: str, tool_context: Optional[ToolContext] = None):
+    """
+    Store uploaded file content in state for the agents to process.
+    """
+    text_file = os.path.abspath(filename + ".txt")
+    with open(text_file, 'w') as f:
+        f.write(code)
+
+    if tool_context is not None:
+        existing_files = tool_context.state.get("temp:processed_data", [])
+        tool_context.state["temp:processed_data"] = existing_files + [text_file]
+        tool_context.state["criticism"] = "Documentation complete"
+
+    return [text_file]
+
+
 def exit_loop(tool_context: ToolContext):
     """Call this function ONLY when the critique indicates no further changes are needed, signaling the iterative process should end."""
     print(f"  [Tool Call] exit_loop triggered by {tool_context.agent_name}")
     tool_context.actions.escalate = True
-    # Return empty dict as tools should typically return JSON-serializable output
     return {}
 
 
@@ -54,7 +68,6 @@ def text_translation(files: List[str], extension: str, tool_context: ToolContext
         with open(file, 'r') as f:
             code = f.read()
         with open(new_file, 'w') as txt_file:
-            # Write the content to the text file
             txt_file.write(code)
             text_files.append(new_file)
 
@@ -63,57 +76,53 @@ def text_translation(files: List[str], extension: str, tool_context: ToolContext
     return text_files
 
 def pattern_matching_java(tool_context: ToolContext):
-    text_files = tool_context.state.get("temp:processed_data")
-    global extracted_methods
-    extracted_methods = text_files.copy()
+    text_files = tool_context.state.get("temp:processed_data", [])
+    if not text_files:
+        return []
 
     array = [[] for _ in range(len(text_files))]
-    index = -1
-
     access = {"public", "private", "protected", "(", ")", "}", "{", "throws"}
     stopper = "#"
-    try:
-        for file1 in text_files:
-            index += 1
+
+    for index, file1 in enumerate(text_files):
+        try:
             with open(file1, "r") as file:
                 for line in file:
-                    count = 0
-                    for item in access:
-                        if line.startswith(stopper):
-                            continue
-                        elif item in line.strip():
-                            count += 1
-                    if count >= 4:
+                    count = sum(1 for item in access if item in line.strip())
+                    if count >= 4 and not line.startswith(stopper):
                         array[index].append(line)
-        return array
-    except FileNotFoundError:
-        print("Error: The file 'my_file.txt' was not found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        except FileNotFoundError:
+            print(f"Error: The file '{file1}' was not found.")
+        except Exception as e:
+            print(f"An error occurred while reading {file1}: {e}")
+
+    return array
+
 
 def pattern_matching_python(tool_context: ToolContext):
-    text_files = tool_context.state.get("temp:processed_data")
-    global extracted_methods
-    extracted_methods = text_files.copy()
+    text_files = tool_context.state.get("temp:processed_data", [])
+    if not text_files:
+        return [] 
 
     array = [[] for _ in range(len(text_files))]
-    index = -1
     keyword = "def"
     stopper = "#"
-    try:
-        for file1 in text_files:
-            index += 1
+
+    for index, file1 in enumerate(text_files):
+        try:
             with open(file1, "r") as file:
                 for line in file:
                     if line.startswith(stopper):
                         continue
                     elif keyword in line.strip():
                         array[index].append(line)
-        return array
-    except FileNotFoundError:
-        print("Error: The file 'my_file.txt' was not found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        except FileNotFoundError:
+            print(f"Error: The file '{file1}' was not found.")
+        except Exception as e:
+            print(f"An error occurred while reading {file1}: {e}")
+
+    return array
+
 
 
 # --- Agent Definitions ---
@@ -130,10 +139,11 @@ read_agent = LlmAgent(
     You will use the get_files method to scan a directory and return an array of all the extension files 
     that the user specified, and the text_translation method with the parameters equal to the array you 
     returned from get_files and the user's declared extension. 
+    A list of uploaded file paths or text content, in which case you will process those files directly without scanning directories.
     Finally you will return an array of the .txt files to writing agent.
     
 """,
-    tools=[get_files, text_translation],
+    tools=[get_files, text_translation, process_uploaded_file],
     output_key=STATE_CURRENT_DOC
 )
 
@@ -143,7 +153,6 @@ interpreter_agent_in_loop = LlmAgent(
     model=GEMINI_MODEL,
     include_contents='none',
     output_key=STATE_CRITICISM,
-    # MODIFIED Instruction: More nuanced completion criteria, look for clear improvement paths.
     instruction=f"""You are a documentation AI who's job is to analyze code and be able to provide documentation on 
     what it can accomplish
 
@@ -200,7 +209,6 @@ interpreter_agent_in_loop = LlmAgent(
 documentation_agent_in_loop = LlmAgent(
     name="documentation_agent",
     model=GEMINI_MODEL,
-    # Relies solely on state via placeholders
     include_contents='none',
     instruction=f"""You are a Documentation Creator tasked with formatting a documentation file given some parameters.
     **Current Document:**
@@ -283,8 +291,8 @@ refinement_loop = LoopAgent(
 root_agent = SequentialAgent(
     name="IterativeWritingPipeline",
     sub_agents=[
-        read_agent,  # Run first to create initial doc
-        refinement_loop  # Then run the critique/refine loop
+        read_agent,  
+        refinement_loop  
     ],
     description="Writes an initial document and then iteratively refines it with critique using an exit tool."
 
