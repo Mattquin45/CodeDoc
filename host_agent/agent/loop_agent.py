@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from google.adk.agents import LoopAgent, LlmAgent, BaseAgent, SequentialAgent
 from google.genai import types
@@ -26,6 +27,9 @@ STATE_CRITICISM = "criticism"
 COMPLETION_PHRASE = "Documentation complete"
 
 
+#Instance variables
+extracted_methods = [None]
+
 # --- Tool Definition ---
 def exit_loop(tool_context: ToolContext):
     """Call this function ONLY when the critique indicates no further changes are needed, signaling the iterative process should end."""
@@ -45,7 +49,7 @@ def get_files(directory1: str, extension1: str = ".py"):
     return found_files
 
 
-def text_translation(files: List[str], extension: str):
+def text_translation(files: List[str], extension: str, tool_context: ToolContext):
     text_files = []
     for file in files:
         new_file = os.path.basename(file) + ".txt"
@@ -56,37 +60,60 @@ def text_translation(files: List[str], extension: str):
             txt_file.write(code)
             text_files.append(new_file)
 
+    processed_data = text_files
+    tool_context.state["temp:processed_data"] = processed_data
     return text_files
 
 
-def pattern_matching_java(file):
-    access = {"public", "private", "protected"}
-    parameters = {"(", ")", "}", "{", "throws"}
+def pattern_matching_java(tool_context: ToolContext):
+    text_files = tool_context.state.get("temp:processed_data")
+    global extracted_methods
+    extracted_methods = text_files.copy()
+
+    array = [[] for _ in range(len(text_files))]
+    index = -1
+
+    access = {"public", "private", "protected", "(", ")", "}", "{", "throws"}
+    stopper = "#"
     try:
-        with open(file, "r") as file:
-            for line in file:
-                count = 0
-                for str in access:
-                    if str in line.strip():
-                        count += 1
-                for str in parameters:
-                    if str in line.strip():
-                        count += 1
-                if count >= 4:
-                    return line.strip()
+        for file1 in text_files:
+            index += 1
+            with open(file1, "r") as file:
+                for line in file:
+                    count = 0
+                    for item in access:
+                        if line.startswith(stopper):
+                            continue
+                        elif item in line.strip():
+                            count += 1
+                    if count >= 4:
+                        array[index].append(line)
+        return array
     except FileNotFoundError:
         print("Error: The file 'my_file.txt' was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
-def pattern_matching_python(file):
+def pattern_matching_python(tool_context: ToolContext):
+    text_files = tool_context.state.get("temp:processed_data")
+    global extracted_methods
+    extracted_methods = text_files.copy()
+
+    array = [[] for _ in range(len(text_files))]
+    index = -1
     keyword = "def"
+    stopper = "#"
     try:
-        with open(file, "r") as file:
-            for line in file:
-                if keyword in line.strip():
-                    return line.strip()
+        for file1 in text_files:
+            index += 1
+            with open(file1, "r") as file:
+                for line in file:
+                    if line.startswith(stopper):
+                        continue
+                    elif keyword in line.strip():
+                        array[index].append(line)
+        return array
     except FileNotFoundError:
         print("Error: The file 'my_file.txt' was not found.")
     except Exception as e:
@@ -138,12 +165,19 @@ interpreter_agent_in_loop = LlmAgent(
     6. Constructors
     7. Class variables 
     
-    if its in java: use the pattern_matching_java method with parameter of 
-    the current text file to check the entire script for methods:
-        If it returns a line then that is the start of a method, analyse it and add it to documentation
-    if its in python: use the pattern_matching_python method with parameter of 
-    the current text file to check the entire script for methods:
-        If it returns a line then that is the start of a method, analyse it and add it to documentation
+    if its in java: use the pattern_matching_java method with no parameter
+     to check the entire script for methods:
+        It will return a 2D array, in each index of the array is a list of the methods for the corresponding 
+        list of text files given by reader agent
+    if its in python: use the pattern_matching_python method with parameter no parameter
+     to check the entire script for methods:
+        It will return a 2D array, in each index is a list of the methods for the corresponding list of text files
+        given by reader agent 
+        
+     Example: reader agent output: [Script1.txt , Script2.txt, Script3.txt]  
+     Example output: output of pattern_matching methods: [(Script1_methods):[Method1 , Method2, Method3],...]
+     
+     This is just to fetch the methods, you must fetch the rest manually
         
     After finding all components you must provide a description of it that is concise and to the point 
     Example:
