@@ -16,10 +16,10 @@ This specific Hackathon project made by a team of 4, implemented the use of Goog
 -Streamlit (pip install streamlit)
 -Other dependencies in requirements.txt
 
-⚙️ Installation
-# Clone this repository
-git clone https://github.com/Mattquin45/CodeDoc.git
-cd CodeDoc.git
+# ⚙️ Installation
+-Clone this repository
+-git clone https://github.com/Mattquin45/CodeDoc.git
+-cd CodeDoc.git
 
 # Create a virtual environment
 python -m venv venv        # Windows
@@ -30,10 +30,9 @@ venv\Scripts\activate      # Windows
 # Install dependencies
 pip install -r requirements.txt
 
-🔑 Environment Setup
+# 🔑 Environment Setup
 
 Create a .env file in the project root:
-
 ADK_AGENT_PATH=./agents
 API_SERVER_PORT=8000
 STREAMLIT_PORT=8501
