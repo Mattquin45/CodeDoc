@@ -1,0 +1,86 @@
+public class HashTable {
+
+    private int[] table;
+    private int size;
+
+    public HashTable(){
+        this.table = new int[10];
+        size = table.length;
+    }
+
+    public HashTable(int size){
+        this.table = new int[size];
+        this.size = size;
+    }
+
+    public void hashInsert(HashTable table1 , int k , String string){
+        int i = 0;
+        while(i <= size){
+            int j;
+            //Selects which probing method to use by using the parameter string that the user picked
+            if(string.equals("linear")){
+                j = getLinearProbingIndex(k , i);
+            }else if(string.equals("quadratic")){
+                 j = getQuadraticProbIndex(k , i);
+            }else{
+                 j = getDoubleHash(k , i);
+            }
+
+            if(table[j] == 0){
+                table[j] = k;
+                return;
+            }else{
+                i++;
+            }
+        }
+        System.out.println("Hash Table overflow");
+    }
+
+    public int hashSearch(HashTable table1, int k , String s){
+        int i = 0;
+        int m = size;
+        int j = -1;
+        while(i <= size|| table[j] == 0){
+            if(s.equals("linear")){
+                j = getLinearProbingIndex(k , i);
+            }else if(s.equals("quadratic")){
+                j = getQuadraticProbIndex(k , i);
+            }else{
+                j = getDoubleHash(k , i);
+            }
+
+            if(table[j] == k){
+                return j;
+            }else{
+                i++;
+            }
+        }
+        return -1;
+    }
+
+    public int getLinearProbingIndex(int key, int i){
+        int h1 = key % size;
+        return (h1 + i) % size;
+    }
+
+    public int getQuadraticProbIndex(int key, int i){
+        int h1 = key % size;
+        return ((h1 + (int)Math.pow(i , 2)) % size);
+    }
+
+    public int getDoubleHash(int key, int i){
+        int h1 = key % size;
+        int h2 = 1 + (key % (size-1));
+        return (h1 + (i*h2)) % size;
+    }
+
+    public String toString(){
+        String s = "[";
+        for(int i = 0; i <size - 1; i++){
+            s = s + table[i] + ", ";
+        }
+        s = s+ table[size -1] + "]";
+        return s;
+    }
+
+}

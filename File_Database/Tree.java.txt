@@ -4,7 +4,7 @@ public class Tree <T>{
         private int data;
         Node<T> left;
         Node<T> right;
-        public Node(){
+         public Node(){
             data = 0;
             left = null;
             right = null;

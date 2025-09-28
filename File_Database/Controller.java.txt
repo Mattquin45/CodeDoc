@@ -1,91 +1,15 @@
+import java.util.Arrays;
+
 public class Controller {
 
     public static void main(String[] args){
-//        ArrayList<Integer> list = new ArrayList<>();
-//        list.add(5);
-//        list.add(7);
-//        list.add(9);
-//        list.add(3);
-//        list.add(15);
-//        list.add(5 , 20);
-//        System.out.println(list);
-//
-//        list.remove();
-//        System.out.println(list);
-//        System.out.println(list.get(2));
-//        list.set(4 , 19);
-//        System.out.println(list);
 
-//        LinkedList list2 = new LinkedList();
-//
-//        list2.AddFirst(5);
-//        list2.AddFirst(7);
-//        list2.AddLast(12);
-//        list2.AddLast(20);
-//
-//        System.out.println(list2);
-//
-//        list2.add("T");
-//        list2.add(15.5);
-//
-//        System.out.println(list2);
-//        list2.reverse();
-//        System.out.println(list2);
+        Heap heap = new Heap();
+        heap.MinHeapify(heap.array, 2);
+        System.out.println(heap);
 
-//        ArrayQueue q = new ArrayQueue();
-//        System.out.println(q.isEmpty());
-//
-//        q.enQueue(5);
-//        q.enQueue(10);
-//        q.enQueue(15);
-//        q.enQueue(20);
-//        q.enQueue(25);
-//        System.out.println(q);
-//        q.deQueue();
-//        System.out.println(q);
-//        q.deQueue();
-//        System.out.println(q);
-//        q.deQueue();
-//        q.deQueue();
-//        System.out.println(q);
-//        q.deQueue();
-//        System.out.println(q);
-//        q.enQueue(30);
-//        q.enQueue(35);
-//        q.enQueue(40);
-//        q.enQueue(45);
-//        System.out.println(q);
-//
-//        System.out.println(q.isFull());
+        heap.buildMinHeap(heap.array);
+        System.out.println(heap);
 
-        Stack<String> s = new Stack<>();
-        s.push("A");
-        s.push("B");
-        s.push("C");
-        s.push("D");
-        s.push("E");
-        s.push("F");
-
-        System.out.println(s);
-
-        System.out.println(s.pop());
-        s.pop();
-        System.out.println(s);
-
-        LinkedListStack<Integer> d = new LinkedListStack<Integer>();
-        d.push(1);
-        d.push(2);
-        d.push(3);
-        d.push(4);
-        d.push(5);
-        d.push(6);
-
-        System.out.println(d);
-
-        System.out.println(d.pop());
-        d.pop();
-        System.out.println(d);
-
-        d.reverse();
     }
 }

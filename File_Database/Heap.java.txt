@@ -1,0 +1,65 @@
+import java.util.Arrays;
+
+public class Heap {
+
+    public int[] array;
+    private int height;
+    private int size;
+
+    public Heap(){
+        this.array = new int[]{0 , 1, 11 , 3 , 4 , 12, 10 , 2 , 5, 6 , 8 , 15};
+        this.size = array.length;
+        this.height = getHeight(size);
+    }
+
+    public Heap(int[] arr){
+        this.array = arr;
+        size = arr.length;
+        height = getHeight(size);
+    }
+
+    public void MinHeapify(int[] arr, int index){
+        int left = 2*index;
+        int right = (2*index) + 1;
+        int smallest = 0;
+        if(left <= size && arr[left] < arr[index]){
+            smallest = left;
+        }else{
+            smallest = index;
+        }
+        if(right <= size && arr[right] < arr[smallest]){
+                smallest = right;
+        }
+
+        if(smallest != index){
+            int temp = arr[index];
+            arr[index] = arr[smallest];
+            arr[smallest] = temp;
+            MinHeapify(arr , smallest);
+        }
+    }
+
+    public void buildMinHeap(int[] array){
+        for(int i =( array.length-1)/2;i >= 1;i--){
+            MinHeapify(array , i);
+        }
+    }
+
+    public int getHeight(int n){
+        int count = 0;
+        while(n >= 1){
+            n = n/2;
+            count++;
+        }
+        return count;
+    }
+
+    public String toString(){
+        String s = "[";
+        for(int i = 1; i < array.length - 1;i++){
+            s = s + array[i] + ", ";
+        }
+        s = s + array[size -1 ] + "]";
+        return s;
+    }
+}

@@ -26,9 +26,9 @@ STATE_CRITICISM = "criticism"
 # Define the exact phrase the Critic should use to signal completion
 COMPLETION_PHRASE = "Documentation complete"
 
-# Instance variables
-extracted_methods = [None]
 
+#Instance variables
+extracted_methods = [None]
 
 # --- Tool Definition ---
 def exit_loop(tool_context: ToolContext):
@@ -52,15 +52,11 @@ def get_files(directory1: str, extension1: str = ".py"):
 def text_translation(files: List[str], extension: str, tool_context: ToolContext):
     text_files = []
     for file in files:
-        database_path = "C:/Users/angel/PycharmProjects/pythonProject2/File_Database"
-        new_file_name = os.path.basename(file) + ".txt"
-        new_file = os.path.join(database_path, new_file_name)
-
+        new_file = os.path.basename(file) + ".txt"
         with open(file, 'r') as f:
             code = f.read()
         with open(new_file, 'w') as txt_file:
             # Write the content to the text file
-
             txt_file.write(code)
             text_files.append(new_file)
 

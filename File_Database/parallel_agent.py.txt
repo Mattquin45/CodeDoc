@@ -8,7 +8,7 @@ import loop_agent
 parallel_research_agent = ParallelAgent(
     name="ParallelWebResearchAgent",
     sub_agents=[loop_agent, loop_agent],
-    description="Runs multiple loop agents in parallel to gather information."
+    description="Runs multiple research agents in parallel to gather information."
 )
 
 # --- 3. Define the Merger Agent (Runs *after* the parallel agents) ---
