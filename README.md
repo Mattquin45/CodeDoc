@@ -77,6 +77,8 @@ Extension: .java
 
 - Documentation output is handled in the agent.py by default.
 
+- Always before testing on the UI, press create new session!
+
 # ❗ Troubleshooting
 
 - In your ui.py file make sure that your APP-NAME is the name of your project file. 
